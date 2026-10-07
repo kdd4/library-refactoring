@@ -29,6 +29,23 @@ class Rental:
     def days_rented(self) -> int:
         return self._days_rented
 
+    @property
+    def amount(self) -> float:
+        amount = 0
+
+        if self.book.price_code == Book.REGULAR:
+            amount += 2
+            if self.days_rented > 2:
+                amount += (self.days_rented - 2) * 1.5
+        elif self.book.price_code == Book.NEW_RELEASE:
+            amount += self.days_rented * 3
+        elif self.book.price_code == Book.CHILDREN:
+            amount += 1.5
+            if self.days_rented > 3:
+                amount += (self.days_rented - 3) * 1.5
+
+        return amount
+
 class Client:
 
     def __init__(self, name: str):
@@ -42,39 +59,20 @@ class Client:
     def name(self) -> str:
         return self._name
 
-    def rentalAmount(self, rental: Rental) -> float:
-        amount = 0
-
-        # determine amounts for each line
-        if rental.book.price_code == Book.REGULAR:
-            amount += 2
-            if rental.days_rented > 2:
-                amount += (rental.days_rented - 2) * 1.5
-        elif rental.book.price_code == Book.NEW_RELEASE:
-            amount += rental.days_rented * 3
-        elif rental.book.price_code == Book.CHILDREN:
-            amount += 1.5
-            if rental.days_rented > 3:
-                amount += (rental.days_rented - 3) * 1.5
-
-        return amount
-
     def statement(self) -> str:
         total_amount = 0
         frequent_renter_points = 0
         result = f"Rental summary for {self.name}\n"
         
         for rental in self._rentals:
-            amount = self.rentalAmount(rental)
-
             # add frequent renter points
             frequent_renter_points += 1
             if rental.book.price_code == Book.NEW_RELEASE and rental.days_rented > 1:
                 frequent_renter_points += 1
 
             # show each rental result
-            result += f"- {rental.book.title}: {amount}\n"
-            total_amount += amount
+            result += f"- {rental.book.title}: {rental.amount}\n"
+            total_amount += rental.amount
         
         # show total result
         result += f"Total: {total_amount}\n"
