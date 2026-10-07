@@ -3,9 +3,8 @@ class Account:
         self._number = number
         self._type = type
 
-    @property
-    def interest_rate(self):
-        return self._type.interest_rate
+    def getAccountType(self) -> AccountType:
+        return self._type
 
 
 class AccountType:
