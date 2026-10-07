@@ -1,5 +1,7 @@
-class Book:
+from abc import ABC, abstractmethod
 
+
+class Book:
     REGULAR: int = 0
     NEW_RELEASE: int = 1
     CHILDREN: int = 2
@@ -16,6 +18,28 @@ class Book:
     def price_code(self) -> int:
         return self._price_code
 
+    @property
+    def fixed_cost(self):
+        return {
+            self.REGULAR: 2,
+            self.CHILDREN: 1.5,
+        }.get(self.price_code, 0)
+
+    @property
+    def free_days(self):
+        return {
+            self.REGULAR: 2,
+            self.CHILDREN: 3,
+        }.get(self.price_code, 0)
+
+    @property
+    def daily_cost(self):
+        return {
+            self.REGULAR: 1.5,
+            self.NEW_RELEASE: 3,
+            self.CHILDREN: 1.5,
+        }.get(self.price_code, 0)
+
 class Rental:
     def __init__(self, book: Book, days_rented: int):
         self._book = book
@@ -31,23 +55,16 @@ class Rental:
 
     @property
     def amount(self) -> float:
-        amount = 0
+        amount = self.book.fixed_cost
 
-        if self.book.price_code == Book.REGULAR:
-            amount += 2
-            if self.days_rented > 2:
-                amount += (self.days_rented - 2) * 1.5
-        elif self.book.price_code == Book.NEW_RELEASE:
-            amount += self.days_rented * 3
-        elif self.book.price_code == Book.CHILDREN:
-            amount += 1.5
-            if self.days_rented > 3:
-                amount += (self.days_rented - 3) * 1.5
+        paid_days = self.days_rented - self.book.free_days
+
+        if paid_days > 0:
+            amount += paid_days * self.book.daily_cost
 
         return amount
 
 class Client:
-
     def __init__(self, name: str):
         self._name = name
         self._rentals = []
